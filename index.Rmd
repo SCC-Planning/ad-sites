@@ -1,0 +1,177 @@
+---
+title: "AD Plant Sites in Suffolk"
+scctemplate:
+  header:
+    site_branding: "Suffolk County Council"
+  navigation:
+    breadcrumb_trail:
+      - text: "Home"
+  seo:
+    description: "SEO (search engine optimisation) description"
+    keywords: "SEO, keywords, comma, separated"
+toc: false
+---
+```{r setup, include = FALSE}
+library(sf)
+library(leaflet)
+library(htmltools)
+library(htmlwidgets)
+library(mapview)
+library(leafem)
+library(gt)
+```
+
+## Anaerobic Digestion
+Anaerobic digestion facilities promote anaerobic degradation of organic wastes 
+such as animal wastes, energy crops, and vegetable tailings. The process 
+involves introducing the feedstock into a tank of bacteria rich slurry. This 
+process produces methane gas that is normally used to drive a diesel generator 
+and export the electricity to the grid. The main advantage of this over 
+composting is that electrical power is produced. Co-locating with sewage 
+treatment allows methane to be recovered from sewage and at the same time 
+prevents a potent greenhouse gas from escaping into the atmosphere.
+
+## Policy WP7
+Anaerobic digestion facilities may be acceptable on land:
+
+  a) within the uses identified within Policy WP3; or
+  b) integrated with waste water treatment plants.
+
+Proposals for such facilities at landfill sites may be considered acceptable on a 
+temporary basis whilst landfilling and restoration is taking place on site.
+Proposals must also comply with the environmental criteria set out in Policy 
+GP4.
+
+# List of sites
+
+Below are the sites listed in the Suffolk Minerals & Waste Local Plan, adopted in July 2020.
+
+## Anaerobic Digesion sites
+```{r table, echo = FALSE, warning = FALSE, out.width = "100%", fig.align='left'}
+ad_plants <- data.frame(
+  eastings = c(
+    625406,
+    579489,
+    648331,
+    640294,
+    596243,
+    635649
+  ),
+  northings = c(
+    273627,
+    265335,
+    277563,
+    279245,
+    238477,
+    253229
+  ),
+  site_name = c(
+    "Barley Brigg Biogas Ltd",
+    "Symonds Farm Anaerobic Digestion Plant",
+    "Adnams Distribution Plant",
+    "Bernard Matthews",
+    "Hill Farm, Boxford",
+    "Bentwaters Park AD Plant"
+  ),
+  operator = c(
+    "Barley Brigg Biogas Ltd",
+    "Symonds Farm Power Ltd",
+    "Bio Group Ltd",
+    "Houlton Renewable Power",
+    "Boxford (Suffolk) Farms",
+    "Agri-Gen"
+  )
+)
+
+
+
+ad_plants |> 
+  gt()
+```
+
+## Water Recycling Centres
+
+```{r table_water, echo = FALSE, warning = FALSE, out.width = "100%", fig.align='left'}
+water_plants <- data.frame(
+  eastings = c(
+    646061,
+    634283,
+    616401,
+    618594,
+    620993,
+    605502,
+    587246,
+    578076,
+    639439,
+    644703
+  ),
+  northings = c(
+    260233,
+    241444,
+    235918,
+    254790,
+    262928,
+    267475,
+    279446,
+    263708,
+    289608,
+    290417
+  ),
+  site_name = c(
+    "Aldeburgh Stw",
+    "Alderton Stw",
+    "Alton Water Stw-Private Altows",
+    "Ashbocking-Mill Field Stw",
+    "Ashfield-Sunnyside Cr Stw",
+    "Bacton Finingham La Stw",
+    "Badwell Ash Stw",
+    "Barnham Stw",
+    "Barrow Stw",
+    "Barsham Stf (Suffolk)"
+  ),
+  operator = c(
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water",
+    "Anglian Water"
+  )
+)
+
+water_plants |> 
+  gt()
+```
+
+# Interactive Map of Site Locations
+
+The information above is plotted on an interactive map here. Hover over the markers to get more information.
+
+```{r map, echo = FALSE, warning = FALSE, out.width = "100%", fig.align='center'}
+sf_plants <- st_as_sf(ad_plants, coords = c("eastings", "northings"), crs = 27700)
+sf_plants <- st_transform(sf_plants, 4326)
+
+sf_water <- st_as_sf(water_plants, coords = c("eastings", "northings"), crs = 27700)
+sf_water <- st_transform(sf_water, 4326)
+
+  ff <- leaflet() |> 
+  addTiles() |> 
+  addCircleMarkers(
+    data = sf_plants,
+    label = sf_plants$site_name,
+    color = "#e8850c"
+  ) |> 
+  addCircleMarkers(data = sf_water,
+             label = sf_water$site_name,
+             color = "#2d6ca2") |> 
+    addLegend(
+      colors = c("#e8850c", "#2d6ca2"),
+      labels = c("AD Plants", "Water Recycling Centres")
+    )
+
+ff
+```
