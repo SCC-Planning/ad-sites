@@ -5,7 +5,7 @@ scctemplate:
     site_branding: "Suffolk County Council"
   navigation:
     breadcrumb_trail:
-      - text: "Home"
+      - text: "AD Plants and Safeguarded Sites     in Suffolk mapped"
   seo:
     description: "SEO (search engine optimisation) description"
     keywords: "SEO, keywords, comma, separated"
@@ -159,7 +159,7 @@ sf_plants <- st_transform(sf_plants, 4326)
 sf_water <- st_as_sf(water_plants, coords = c("eastings", "northings"), crs = 27700)
 sf_water <- st_transform(sf_water, 4326)
 
-ff <- leaflet(height = 2000, width = 2000) |> 
+ff <- leaflet(width = "100%") |> 
   addTiles() |> 
   addCircleMarkers(
     data = sf_plants,
@@ -185,3 +185,8 @@ ff <- leaflet(height = 2000, width = 2000) |>
 
 ff
 ```
+
+
+# Reference
+
+All information above was extracted from the [Suffolk Minerals and Waste Plan](https://www.suffolk.gov.uk/planning-waste-and-environment/minerals-and-waste-policy/suffolk-minerals-and-waste-development-scheme/) adopted in July 2020.
