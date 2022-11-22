@@ -19,6 +19,7 @@ library(htmlwidgets)
 library(mapview)
 library(leafem)
 library(gt)
+library(leaflet.extras)
 ```
 
 ## Anaerobic Digestion
@@ -34,8 +35,8 @@ prevents a potent greenhouse gas from escaping into the atmosphere.
 ## Policy WP7
 Anaerobic digestion facilities may be acceptable on land:
 
-  a) within the uses identified within Policy WP3; or
-  b) integrated with waste water treatment plants.
+a) within the uses identified within Policy WP3; or
+b) integrated with waste water treatment plants.
 
 Proposals for such facilities at landfill sites may be considered acceptable on a 
 temporary basis whilst landfilling and restoration is taking place on site.
@@ -158,20 +159,29 @@ sf_plants <- st_transform(sf_plants, 4326)
 sf_water <- st_as_sf(water_plants, coords = c("eastings", "northings"), crs = 27700)
 sf_water <- st_transform(sf_water, 4326)
 
-  ff <- leaflet() |> 
+ff <- leaflet(height = 2000, width = 2000) |> 
   addTiles() |> 
   addCircleMarkers(
     data = sf_plants,
     label = sf_plants$site_name,
-    color = "#e8850c"
+    color = "#e8850c",
+    # labelOptions = labelOptions(
+      # noHide = T, textsize = "10px"
+      # direction = "top"
+    # )
   ) |> 
   addCircleMarkers(data = sf_water,
-             label = sf_water$site_name,
-             color = "#2d6ca2") |> 
-    addLegend(
-      colors = c("#e8850c", "#2d6ca2"),
-      labels = c("AD Plants", "Water Recycling Centres")
-    )
+                   label = sf_water$site_name,
+                   color = "#2d6ca2") |> 
+  addLegend(
+    colors = c("#e8850c", "#2d6ca2"),
+    labels = c("AD Plants", "Water Recycling Centres")
+  ) |> 
+  addFullscreenControl()
+
+# mapshot2(ff, file = "ad_sites.png",
+         # remove_controls = TRUE)
+
 
 ff
 ```
