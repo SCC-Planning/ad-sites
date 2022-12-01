@@ -1,4 +1,4 @@
-# Interactive Mapping of Waste SItes
+# Interactive Mapping of Waste Sites
 Interactive map to show Waste, Water and Mineral Extraction sites in Suffolk,
 along with the appropriate buffers. The Mineral Consultation Area is also included.
 

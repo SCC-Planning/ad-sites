@@ -19,6 +19,7 @@ library(mapview)
 library(leafem)
 library(gt)
 library(leaflet.extras)
+library(DT)
 ```
 
 This interactive map displays all Waste Sites, Mineral Extraction Sites and Anglian Water sites in Suffolk. It is based on data from 2018, so some information is not up to date (for example, Mason's Landfill is now operated by Valencia Waste Management Ltd, and not Viridor Waste Disposal Ltd).
@@ -175,7 +176,7 @@ mineral_map <- leaflet() |>
       "Buffers",
       aw_sites$type,
       sites$type
-      ),
+    ),
     position = "bottomright"
   ) |> 
   hideGroup("Consultation Area") |> 
@@ -201,28 +202,36 @@ Below is the full list of sites mapped above, by type of site.
 
 ```{r aw_sites, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
 
-aw_sites_csv |> 
-  dplyr::select(-type) |> 
-  gt()
+aw_sites_csv <- aw_sites_csv |> 
+  dplyr::select(Ref = Site_Ref, `Site Name` = Site_Name, Operator, Easting, Northing)
+
+datatable(
+  aw_sites_csv,
+  extensions = "Buttons",
+  rownames = FALSE,
+  options = list(
+    dom = "Bfrtip",
+    buttons = c("copy", "csv", "excel", "pdf", "print")
+  )
+)
 
 ```
+
+## All other sites
 
 ```{r waste_sites, echo = FALSE, warning = FALSE, message = FALSE, results = "asis", out.width = "100%", fig.align='left'}
 
 display_sites <- sites |> 
   as.data.frame() |> 
-  dplyr::select(type, Site_Ref, Site_Name, Operator, Easting, Northing)
+  dplyr::select(Ref = Site_Ref, `Site Name` = Site_Name, Operator, Type = type, Easting, Northing)
 
-display_sites$type <- as.character(display_sites$type)
-
-for(site_names in unique(display_sites$type)) {
-  cat("\n##", site_names, "\n")
-  site_table <- display_sites |> 
-    dplyr::filter(type == site_names) |> 
-    dplyr::select(Site_Ref, Site_Name, Operator, Easting, Northing) |> 
-    gt()
-  print(site_table)
-  cat("\n")
-}
-
+datatable(
+  display_sites,
+  extensions = "Buttons",
+  rownames = FALSE,
+  options = list(
+    dom = "Bfrtip",
+    buttons = c("copy", "csv", "excel", "pdf", "print")
+  )
+)
 ```
