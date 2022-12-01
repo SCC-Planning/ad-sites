@@ -22,15 +22,13 @@ library(gt)
 library(leaflet.extras)
 ```
 
-This interactive map displays all Waste Sites, Mineral Extraction Sites and Anglian Water sites in Suffolk.
+This interactive map displays all Waste Sites, Mineral Extraction Sites and Anglian Water sites in Suffolk. 
+
+Hover over each sites to get information on the name, operator and type of sites. Individual sites can be searched for by clicking on the lens icon. You can display this map full screen with the rectangle icon. In the bottom right, you can change the map background, and tick different boxes to include/exclude different types of sites.
 
 For Anglian Water Sites, the site boundaries were not available. Therefore these sites are displayed as points only.
 
-Hover over each sites to get information on the name, operator and type of sites. Individual sites can be searched for by clicking on the lens icon. 
-
-You can display this map full screen with the rectangle icon.
-
-In the bottom right, you can change the map background, and tick different boxes to include/exclude different types of sites.
+For some Mineral and Waste Extraction Sites, no site name and operator is provided. This is a problem in the underlying data.
 
 ```{r map, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
 waste_dir <- "L:\\MAPINFO\\DATA\\data_new\\minerals and waste\\Minerals and Waste GIS\\"
@@ -65,11 +63,11 @@ sites$type <- gsub("Secondary Aggregate Recycling Sites", "Secondary Aggregate R
 sites$type <- regmatches(sites$type, gregexpr("(?<=/).*", sites$type, perl=TRUE))
 
 # Adding in anglian water sites
-aw_sites <- readr::read_csv("C://Documents//ad-sites//anglian_water_sites.csv")
-aw_sites$type <- "Anglian Water Site"
+aw_sites_csv <- readr::read_csv("C://Documents//ad-sites//anglian_water_sites.csv")
+aw_sites_csv$type <- "Anglian Water Site"
 
-colnames(aw_sites) <- c("Site_Ref", "Site_Name", "Operator", "Easting", "Northing", "type")
-aw_sites <- st_as_sf(aw_sites, coords = c("Easting", "Northing"), crs = 27700)
+colnames(aw_sites_csv) <- c("Site_Ref", "Site_Name", "Operator", "Easting", "Northing", "type")
+aw_sites <- st_as_sf(aw_sites_csv, coords = c("Easting", "Northing"), crs = 27700)
 
 # Convert to osgb, we need 1km buffer
 # st_buffer needs to be used in the units of st_crs(x)$units
@@ -194,7 +192,7 @@ Below is the full list of sites mapped above.
 
 ```{r aw_sites, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
 
-aw_sites |> 
+aw_sites_csv |> 
   gt()
 
 ```
