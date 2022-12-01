@@ -30,7 +30,7 @@ Hover over each sites to get information on the name, operator and type of sites
 
 You can display this map full screen with the rectangle icon.
 
-In the bottom left, you can tick different boxes to include/exclude different types of sites.
+In the bottom right, you can change the map background, and tick different boxes to include/exclude different types of sites.
 
 ```{r map, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
 waste_dir <- "L:\\MAPINFO\\DATA\\data_new\\minerals and waste\\Minerals and Waste GIS\\"
@@ -186,6 +186,31 @@ mineral_map <- leaflet() |>
 mineral_map
 ```
 
+## Full list of sites
+
+Below is the full list of sites mapped above.
+
+### Anglian Water Sites
+
+```{r aw_sites, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
+
+aw_sites |> 
+  gt()
+
+```
+
+### Waste Sites 
+
+```{r waste_sites, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
+
+display_sites <- sites |> 
+  as.data.frame() |> 
+  dplyr::select(type, Site_Ref, Site_Name, Operator, Easting, Northing)
+
+display_sites |> 
+  gt()
+
+```
 
 # Reference
 
