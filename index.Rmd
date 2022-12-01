@@ -6,10 +6,9 @@ scctemplate:
   navigation:
     breadcrumb_trail:
       - text: " Interactive Map of Waste Locations of Interest"
-  seo:
-    description: "SEO (search engine optimisation) description"
-    keywords: "SEO, keywords, comma, separated"
-toc: false
+    toc:
+      sticky: false
+      numbered: false
 ---
 ```{r setup, include = FALSE}
 library(sf)
@@ -29,6 +28,8 @@ Hover over each sites to get information on the name, operator and type of sites
 For Anglian Water Sites, the site boundaries were not available. Therefore these sites are displayed as points only.
 
 For some Mineral and Waste Extraction Sites, no site name and operator is provided. This is a problem in the underlying data.
+
+# Interactive Map
 
 ```{r map, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
 waste_dir <- "L:\\MAPINFO\\DATA\\data_new\\minerals and waste\\Minerals and Waste GIS\\"
@@ -184,11 +185,11 @@ mineral_map <- leaflet() |>
 mineral_map
 ```
 
-## Full list of sites
+# Full list of sites
 
-Below is the full list of sites mapped above.
+Below is the full list of sites mapped above, by type of site.
 
-### Anglian Water Sites
+## Anglian Water Sites
 
 ```{r aw_sites, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
 
@@ -197,19 +198,22 @@ aw_sites_csv |>
 
 ```
 
-### Waste Sites 
-
-```{r waste_sites, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
+```{r waste_sites, echo = FALSE, warning = FALSE, message = FALSE, results = "asis", out.width = "100%", fig.align='left'}
 
 display_sites <- sites |> 
   as.data.frame() |> 
   dplyr::select(type, Site_Ref, Site_Name, Operator, Easting, Northing)
 
-display_sites |> 
-  gt()
+display_sites$type <- as.character(display_sites$type)
+
+for(site_names in unique(display_sites$type)) {
+  cat("\n##", site_names, "\n")
+  site_table <- display_sites |> 
+    dplyr::filter(type == site_names) |> 
+    dplyr::select(Site_Ref, Site_Name, Operator, Easting, Northing) |> 
+    gt()
+  print(site_table)
+  cat("\n")
+}
 
 ```
-
-# Reference
-
-All information above was extracted from the [Suffolk Minerals and Waste Plan](https://www.suffolk.gov.uk/planning-waste-and-environment/minerals-and-waste-policy/suffolk-minerals-and-waste-development-scheme/) adopted in July 2020.
