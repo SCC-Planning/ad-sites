@@ -21,9 +21,11 @@ library(gt)
 library(leaflet.extras)
 ```
 
-This interactive map displays all Waste Sites, Mineral Extraction Sites and Anglian Water sites in Suffolk. 
+This interactive map displays all Waste Sites, Mineral Extraction Sites and Anglian Water sites in Suffolk. It is based on data from 2018, so some information is not up to date (for example, Mason's Landfill is now operated by Valencia Waste Management Ltd, and not Viridor Waste Disposal Ltd).
 
-Hover over each sites to get information on the name, operator and type of sites. Individual sites can be searched for by clicking on the lens icon. You can display this map full screen with the rectangle icon. In the bottom right, you can change the map background, and tick different boxes to include/exclude different types of sites.
+Hover over each site to get information on the name, operator and type of sites. Individual sites can be searched for by clicking on the lens icon. You can display this map full screen with the rectangle icon. 
+
+In the bottom right, you can change the map background, and tick different boxes to include/exclude different types of sites. **The Consultation Area is hidden by default**, and can be switched on here.
 
 For Anglian Water Sites, the site boundaries were not available. Therefore these sites are displayed as points only.
 
@@ -168,9 +170,15 @@ mineral_map <- leaflet() |>
   addLayersControl(
     data = sites,
     baseGroups = c("Topo", "Satellite"),
-    overlayGroups = c("Consultation Area", "Buffers", aw_sites$type, sites$type),
+    overlayGroups = c(
+      "Consultation Area",
+      "Buffers",
+      aw_sites$type,
+      sites$type
+      ),
     position = "bottomright"
   ) |> 
+  hideGroup("Consultation Area") |> 
   addLegend(
     colors = c("#e8850c", "#2d6ca2", "#666"),
     labels = c("Waste Sites/Mineral Extraction Sites", "Anglian Water Sites", "Consultation Area")
@@ -194,6 +202,7 @@ Below is the full list of sites mapped above, by type of site.
 ```{r aw_sites, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
 
 aw_sites_csv |> 
+  dplyr::select(-type) |> 
   gt()
 
 ```
