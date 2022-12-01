@@ -1,11 +1,11 @@
 ---
-title: "AD Plant Sites in Suffolk"
+title: "Interactive Map of Waste Locations of Interest"
 scctemplate:
   header:
     site_branding: "Suffolk County Council"
   navigation:
     breadcrumb_trail:
-      - text: "AD Plants and Safeguarded Sites     in Suffolk mapped"
+      - text: " Interactive Map of Waste Locations of Interest"
   seo:
     description: "SEO (search engine optimisation) description"
     keywords: "SEO, keywords, comma, separated"
@@ -22,168 +22,168 @@ library(gt)
 library(leaflet.extras)
 ```
 
-## Anaerobic Digestion
-Anaerobic digestion facilities promote anaerobic degradation of organic wastes 
-such as animal wastes, energy crops, and vegetable tailings. The process 
-involves introducing the feedstock into a tank of bacteria rich slurry. This 
-process produces methane gas that is normally used to drive a diesel generator 
-and export the electricity to the grid. The main advantage of this over 
-composting is that electrical power is produced. Co-locating with sewage 
-treatment allows methane to be recovered from sewage and at the same time 
-prevents a potent greenhouse gas from escaping into the atmosphere.
+This interactive map displays all Waste Sites, Mineral Extraction Sites and Anglian Water sites in Suffolk.
 
-## Policy WP7
-Anaerobic digestion facilities may be acceptable on land:
+For Anglian Water Sites, the site boundaries were not available. Therefore these sites are displayed as points only.
 
-a) within the uses identified within Policy WP3; or
-b) integrated with waste water treatment plants.
+Hover over each sites to get information on the name, operator and type of sites. Individual sites can be searched for by clicking on the lens icon. 
 
-Proposals for such facilities at landfill sites may be considered acceptable on a 
-temporary basis whilst landfilling and restoration is taking place on site.
-Proposals must also comply with the environmental criteria set out in Policy 
-GP4.
+You can display this map full screen with the rectangle icon.
 
-# List of sites
+In the bottom left, you can tick different boxes to include/exclude different types of sites.
 
-Below are the sites listed in the Suffolk Minerals & Waste Local Plan, adopted in July 2020.
+```{r map, echo = FALSE, warning = FALSE, message = FALSE, out.width = "100%", fig.align='center'}
+waste_dir <- "L:\\MAPINFO\\DATA\\data_new\\minerals and waste\\Minerals and Waste GIS\\"
 
-## Anaerobic Digesion sites
-```{r table, echo = FALSE, warning = FALSE, out.width = "100%", fig.align='left'}
-ad_plants <- data.frame(
-  eastings = c(
-    625406,
-    579489,
-    648331,
-    640294,
-    596243,
-    635649
-  ),
-  northings = c(
-    273627,
-    265335,
-    277563,
-    279245,
-    238477,
-    253229
-  ),
-  site_name = c(
-    "Barley Brigg Biogas Ltd",
-    "Symonds Farm Anaerobic Digestion Plant",
-    "Adnams Distribution Plant",
-    "Bernard Matthews",
-    "Hill Farm, Boxford",
-    "Bentwaters Park AD Plant"
-  ),
-  operator = c(
-    "Barley Brigg Biogas Ltd",
-    "Symonds Farm Power Ltd",
-    "Bio Group Ltd",
-    "Houlton Renewable Power",
-    "Boxford (Suffolk) Farms",
-    "Agri-Gen"
-  )
-)
+# Mineral Consulation Area
+consultation_area <- st_read(paste0(waste_dir, "Minerals Consultation Area.TAB"), drivers = "MapInfo File", quiet = TRUE)
+consultation_area <- st_transform(consultation_area, 4326)
 
+# waste sites
+site_types <- list.files(waste_dir, "*.TAB", recursive = TRUE)
 
+site_types <- site_types[!grepl("combined", site_types)]
+site_types <- site_types[!grepl("Buffer", site_types)]
+site_types <- site_types[!grepl("Minerals Consultation Area", site_types)]
 
-ad_plants |> 
-  gt()
-```
+sites <- lapply(site_types, function(names) {
+  sites <- st_read(paste0(waste_dir, names), quiet = TRUE)
+  sites$type <- names
+  return(sites)
+})
 
-## Water Recycling Centres
+sites <- dplyr::bind_rows(sites)
 
-```{r table_water, echo = FALSE, warning = FALSE, out.width = "100%", fig.align='left'}
-water_plants <- data.frame(
-  eastings = c(
-    646061,
-    634283,
-    616401,
-    618594,
-    620993,
-    605502,
-    587246,
-    578076,
-    639439,
-    644703
-  ),
-  northings = c(
-    260233,
-    241444,
-    235918,
-    254790,
-    262928,
-    267475,
-    279446,
-    263708,
-    289608,
-    290417
-  ),
-  site_name = c(
-    "Aldeburgh Stw",
-    "Alderton Stw",
-    "Alton Water Stw-Private Altows",
-    "Ashbocking-Mill Field Stw",
-    "Ashfield-Sunnyside Cr Stw",
-    "Bacton Finingham La Stw",
-    "Badwell Ash Stw",
-    "Barnham Stw",
-    "Barrow Stw",
-    "Barsham Stf (Suffolk)"
-  ),
-  operator = c(
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water",
-    "Anglian Water"
-  )
-)
+sites$type <- gsub(".TAB", "", sites$type)
+sites$type <- gsub("2", "", sites$type)
+sites$type <- gsub("1", "", sites$type)
+sites$type <- gsub("_", "", sites$type)
+sites$type <- gsub("Miscillaneous", "Miscellaneous", sites$type)
+sites$type <- gsub("Secondary Aggregate Recycling Sites", "Secondary Aggregate Recycling", sites$type)
 
-water_plants |> 
-  gt()
-```
+# Remove recursive folder names
+sites$type <- regmatches(sites$type, gregexpr("(?<=/).*", sites$type, perl=TRUE))
 
-# Interactive Map of Site Locations
+# Adding in anglian water sites
+aw_sites <- readr::read_csv("C://Documents//ad-sites//anglian_water_sites.csv")
+aw_sites$type <- "Anglian Water Site"
 
-The information above is plotted on an interactive map here. Hover over the markers to get more information.
+colnames(aw_sites) <- c("Site_Ref", "Site_Name", "Operator", "Easting", "Northing", "type")
+aw_sites <- st_as_sf(aw_sites, coords = c("Easting", "Northing"), crs = 27700)
 
-```{r map, echo = FALSE, warning = FALSE, out.width = "100%", fig.align='center'}
-sf_plants <- st_as_sf(ad_plants, coords = c("eastings", "northings"), crs = 27700)
-sf_plants <- st_transform(sf_plants, 4326)
+# Convert to osgb, we need 1km buffer
+# st_buffer needs to be used in the units of st_crs(x)$units
+sites_buffer <- st_buffer(sites, dist = 250)
+aw_buffer <- st_buffer(aw_sites, dist = 400)
 
-sf_water <- st_as_sf(water_plants, coords = c("eastings", "northings"), crs = 27700)
-sf_water <- st_transform(sf_water, 4326)
+sites_buffer <- st_union(aw_buffer, sites_buffer)
 
-ff <- leaflet(width = "100%") |> 
-  addTiles() |> 
-  addCircleMarkers(
-    data = sf_plants,
-    label = sf_plants$site_name,
-    color = "#e8850c",
-    # labelOptions = labelOptions(
-      # noHide = T, textsize = "10px"
-      # direction = "top"
-    # )
+# Combine buffers if they overlap
+sites_buffer <- sites_buffer %>% 
+  st_union() %>% 
+  st_cast('POLYGON')
+
+sites <- st_transform(sites, 4326)
+aw_sites <- st_transform(aw_sites, 4326)
+
+sites_buffer <- st_transform(sites_buffer, 4326)
+
+# HTML labels
+labels <- sprintf(
+  "<strong>%s</strong><br/><strong>%s</strong><br/> %s",
+  sites$Site_Name, sites$Operator, sites$type
+) %>% lapply(htmltools::HTML)
+
+aw_labels <- sprintf(
+  "<strong>%s</strong><br/><strong>%s</strong><br/> %s",
+  aw_sites$Site_Name, aw_sites$Operator, aw_sites$type
+) %>% lapply(htmltools::HTML)
+
+mineral_map <- leaflet() |> 
+  addTiles(group = "Topo") |> 
+  addTiles(
+    urlTemplate = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    group = "Satellite"
   ) |> 
-  addCircleMarkers(data = sf_water,
-                   label = sf_water$site_name,
-                   color = "#2d6ca2") |> 
+  leaflet::addPolygons(
+    data = sites,
+    group = sites$type,
+    color = "black",
+    opacity = 1,
+    weight = 2,
+    fillColor = "#e8850c",
+    fillOpacity = 0.2,
+    highlightOptions = highlightOptions(
+      color = "white",
+      weight = 4,
+      fill = "#666",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    ),
+    label = labels,
+    labelOptions = labelOptions(
+      style = list("font-weigth" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto"
+    ),
+  ) |> 
+  leaflet::addCircles(
+    data = aw_sites,
+    group = aw_sites$type,
+    color = "black",
+    opacity = 1,
+    weight = 2,
+    fillColor = "#2d6ca2",
+    fillOpacity = 0.2,
+    highlightOptions = highlightOptions(
+      color = "white",
+      weight = 4,
+      fill = "#666",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    ),
+    label = aw_labels,
+    labelOptions = labelOptions(
+      style = list("font-weigth" = "normal", padding = "3px 8px"),
+      textsize = "15px",
+      direction = "auto"
+    ),
+  ) |> 
+  leaflet::addPolygons(
+    data = sites_buffer,
+    color = "black",
+    opacity = 1,
+    weight = 2,
+    fill = FALSE,
+    group = "Buffers"
+  ) |> 
+  leaflet::addPolygons(
+    data = consultation_area,
+    color = "black",
+    opacity = 1,
+    weight = 2,
+    fill = "#666",
+    fillOpacity = 0.1,
+    group = "Consultation Area"
+  ) |> 
+  addLayersControl(
+    data = sites,
+    baseGroups = c("Topo", "Satellite"),
+    overlayGroups = c("Consultation Area", "Buffers", aw_sites$type, sites$type),
+    position = "bottomright"
+  ) |> 
   addLegend(
-    colors = c("#e8850c", "#2d6ca2"),
-    labels = c("AD Plants", "Water Recycling Centres")
-  ) |> 
+    colors = c("#e8850c", "#2d6ca2", "#666"),
+    labels = c("Waste Sites/Mineral Extraction Sites", "Anglian Water Sites", "Consultation Area")
+  ) |>
+  addSearchFeatures(
+    targetGroups = c(sites$type, aw_sites$type),
+    options = searchFeaturesOptions(
+      hideMarkerOnCollapse = TRUE
+    )) |> 
   addFullscreenControl()
 
-# mapshot2(ff, file = "ad_sites.png",
-         # remove_controls = TRUE)
-
-
-ff
+mineral_map
 ```
 
 
