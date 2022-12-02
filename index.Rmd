@@ -103,8 +103,8 @@ mineral_types <- c(
   "Concrete Batching Plants",
   "Concrete Products Sites",
   "Mineral Extraction Sites",
-  "Mineral Railheads",
-  "Mineral Wharves"
+  "Minerals Railheads",
+  "Minerals Wharves"
 )
 
 sites$type <- as.character(sites$type)
