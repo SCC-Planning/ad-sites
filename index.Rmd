@@ -174,7 +174,7 @@ mineral_map <- leaflet() |>
       fillOpacity = 0.7,
       bringToFront = TRUE
     ),
-    label = labels,
+    label = mineral_labels,
     labelOptions = labelOptions(
       style = list("font-weigth" = "normal", padding = "3px 8px"),
       textsize = "15px",
@@ -249,7 +249,7 @@ htmlwidgets::saveWidget(mineral_map, "mineral_map.html")
 htmltools::tags$iframe(
   src = "mineral_map.html",
   width = "100%",
-  style="height: 100vh;",
+  style="height: 75vh;",
   scrolling = "no"
 )
 
