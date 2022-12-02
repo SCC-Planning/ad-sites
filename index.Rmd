@@ -159,7 +159,7 @@ mineral_map <- leaflet() |>
       direction = "auto"
     ),
   ) |> 
-    leaflet::addPolygons(
+  leaflet::addPolygons(
     data = mineral_sites,
     group = mineral_sites$type,
     color = "black",
@@ -244,7 +244,15 @@ mineral_map <- leaflet() |>
     )) |> 
   addFullscreenControl()
 
-mineral_map
+htmlwidgets::saveWidget(mineral_map, "mineral_map.html")
+
+htmltools::tags$iframe(
+  src = "mineral_map.html",
+  width = "100%",
+  style="height: 100vh;",
+  scrolling = "no"
+)
+
 ```
 
 # Full list of sites
